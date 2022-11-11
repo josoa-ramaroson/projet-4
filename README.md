@@ -3,4 +3,3 @@
 Une application serverless deployé sur aws
 
 
-## le projet a utilisé plusieur techno
