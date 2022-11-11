@@ -1,20 +1,21 @@
 import * as AWS from 'aws-sdk'
 import { DocumentClient } from 'aws-sdk/clients/dynamodb'
-//import { createLogger } from '../utils/logger'
+import { createLogger } from '../utils/logger'
 import { TodoItem } from '../models/TodoItem'
 //import { TodoUpdate } from '../models/TodoUpdate';
 import { UpdateTodoRequest } from '../requests/UpdateTodoRequest'
+//import { s3KeyNormalizer } from 'middy/middlewares'
 
 const AWSXRay = require('aws-xray-sdk')
-
+const logger = createLogger('Todos')
 const XAWS = AWSXRay.captureAWS(AWS)
 const todosTable = process.env.TODOS_TABLE
 const index = process.env.TODOS_CREATED_AT_INDEX
 const attachmentsBucker= process.env.ATTACHMENT_S3_BUCKET
-const s3 = new XAWS.S3({
+  const s3 = new XAWS.S3({
   signatureVersion: 'v4'
 })
-//const logger = createLogger('TodosAccess')
+
 const  docClient: DocumentClient = createDynamoDBClient()
 // // TODO: Implement the dataLayer logic
 
@@ -89,29 +90,32 @@ export async function createTodo(todo: TodoItem): Promise<TodoItem> {
     
     return result.Attributes as TodoItem 
   }
-  export async function deleteTodo(todoId: string,userId:string):Promise<TodoItem>{
-    const result = await docClient.delete({
+  export async function deleteTodo(userId:string,todoId:string):Promise<Boolean>{
+  
+
+
+    try {
+       await docClient.delete({
         TableName : todosTable,
         Key:{
             userId: userId,
             todoId: todoId
         }
     }).promise()
-    s3.deleteObject({
-        Bucket: attachmentsBucker,
-        Key: todoId
-    })
-    .promise()
 
+    return true
 
-    
-    return result.Attributes as TodoItem 
+  } catch (e) {
+    logger.info(`Failed to deleteTodo ${todoId}: `, e) 
+    return false
+  }
+
   }
 
   export async function updateTodoAll(todoId: string, userId: string, updateRequest:UpdateTodoRequest): Promise<any> {
 
     try {   
-      await this.docClient.update({
+      await docClient.update({
         TableName: todosTable,
         Key: {
           userId,
@@ -133,4 +137,21 @@ export async function createTodo(todo: TodoItem): Promise<TodoItem> {
     return false
   }
     
+}
+
+// function deleteImage(totdo)
+export async function deleteAttachment(todoId: string):Promise<boolean>{
+  console.log(todoId)
+  try{
+      s3
+    .deleteObject({
+        Bucket: attachmentsBucker,
+        Key: todoId
+    })
+    return true
+  }
+ catch(e){
+  return false
+ }
+
 }

@@ -4,7 +4,7 @@ import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda'
 import * as middy from 'middy'
 import { cors, httpErrorHandler } from 'middy/middlewares'
 
-import { deleteTodo } from '../../helpers/todosAcess'
+import { deleteTodo,deleteAttachment } from '../../dataLayer/todosAcess'
 import { getUserId } from '../utils'
 
 import { createLogger } from '../../utils/logger'
@@ -15,10 +15,18 @@ export const handler = middy(
     const todoId = event.pathParameters.todoId
     // TODO: Remove a TODO item by id
     const userId = getUserId(event)
+  
 
     logger.info("suppression d'un todo");
 
-    const result = await deleteTodo(todoId,userId);
+    try{
+    const result = await deleteTodo(userId,todoId);
+    const resultBucket = await deleteAttachment(todoId);
+
+    if(!resultBucket)
+      logger.info("suppression de l'image dans s3")
+
+      
     if(result){
         return {
           statusCode: 204,
@@ -32,6 +40,13 @@ export const handler = middy(
           body: "Une erreur a survenu"
         }
       }
+    }
+    catch(error){
+      return {
+        statusCode: 500,
+        body: JSON.stringify(error),
+      }
+    }
   }
 )
 

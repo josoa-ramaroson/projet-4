@@ -2,12 +2,12 @@ import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda'
 import 'source-map-support/register'
 import * as middy from 'middy'
 import { cors } from 'middy/middlewares'
-import { createTodo } from '../../helpers/todosAcess'
+import { createTodo } from '../../dataLayer/todosAcess'
 import { CreateTodoRequest } from '../../requests/CreateTodoRequest'
 // import { getUserId } from '../utils';
 //import { createTodo } from '../../businessLogic/todos'
 
-import {buildTodo} from '../../helpers/todos'
+import {buildTodo} from '../../businessLogic/todos'
 
 import { createLogger } from '../../utils/logger'
 const logger = createLogger('auth');
