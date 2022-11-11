@@ -1,5 +1,5 @@
 # Quatrième projet du programme nanodegree Udacity
-## DDescription du projet:
+## Description du projet:
 Déployer une application serverless  en utilisant plusieurs services  offerte par AWS.
 L'application est un  **"Todo List"** qui permette d'ajouter, supprimer, modifier un **Todo**.
 On peut aussi ajouter une image à chaque **Todo**, d'où l'utilisation de service de stockage offerte par AWS.
